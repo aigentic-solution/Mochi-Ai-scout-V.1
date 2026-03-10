@@ -16,16 +16,27 @@ if not GEMINI_API_KEY:
     )
 
 def summarize_with_gemini(news_text):
-    print("> กำลังส่งข่าวให้ Gemini สรุปด้วย Key ใหม่...")
+    print("> กำลังส่งข่าวให้ Gemini สรุปในสไตล์เลขาฯ...")
     try:
         client = genai.Client(api_key=GEMINI_API_KEY)
 
-        response = client.models.generate_content(
-            model="gemini-flash-latest", 
-            contents=f"คุณคือ 'โมจิ' ผู้ช่วย AI สรุปข่าว AI ต่อไปนี้เป็นภาษาไทยสั้นๆ 1-2 ประโยคต่อข่าว โดยเน้นประเด็นสำคัญและพูดจาอ่อนโยน:\n\n{news_text}"
+        # ปรับ System Instruction ให้เป็นสไตล์เลขาฯ และเน้นประโยชน์ต่อการเรียน/ทำงาน
+        system_instruction = (
+            "คุณคือ 'โมจิ' เลขาฯ ส่วนตัวที่ฉลาดและคล่องแคล่ว "
+            "หน้าที่ของคุณคือสรุปข่าว AI 3 ข่าวนี้ให้เจ้าของเครื่องที่เป็นนักศึกษา Computer Engineering และ AI Engineer "
+            "โดยเน้นวิเคราะห์ว่าข่าวนั้นมีประโยชน์ต่อการพัฒนาทักษะ หรือมี Tool อะไรที่น่าเอาไปลองใช้กับโปรเจกต์บ้าง "
+            "สรุปข่าวละ 1-2 ประโยคด้วยภาษาไทยที่เป็นทางการแต่เรียบง่าย ไม่ต้องใช้คำหวานเลี่ยน "
+            "ไม่ต้องใช้คำว่า 'บอส' ให้เรียกว่า 'คุณ' หรือไม่ต้องมีสรรพนามแทนตัวก็ได้ "
+            "จบด้วยการวิเคราะห์ภาพรวมสั้นๆ ว่าวันนี้มีอะไรที่ควร 'ต้องรู้' เป็นพิเศษ"
         )
+
+        response = client.models.generate_content(
+            model="gemini-1.5-flash", # แนะนำให้ใช้รุ่นนี้เพื่อความเสถียรค่ะ
+            contents=f"{system_instruction}\n\nนี่คือข่าวที่คุณต้องสรุป:\n{news_text}"
+        )
+        
         if response.text:
-            print("> [สำเร็จ!] Gemini สรุปเรียบร้อย")
+            print("> [สำเร็จ!] เลขาฯ สรุปเรียบร้อย")
             return response.text
     except Exception as e:
         print(f"> ระบบขัดข้อง: {e}")
@@ -72,4 +83,5 @@ def track_ai_news():
 if __name__ == "__main__":
     print("--- [ Mochi AI Scout v3.0 Start ] ---")
     track_ai_news()
+
     print("--- [ Finish ] ---")
